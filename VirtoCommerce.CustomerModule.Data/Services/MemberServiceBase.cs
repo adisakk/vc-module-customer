@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -108,8 +108,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                             if (dataTargetMember != null)
                             {
                                 changeTracker.Attach(dataTargetMember);
-                                changedEntries.Add(new GenericChangedEntry<Member>(member, dataTargetMember.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(member.MemberType)), EntryState.Modified));
-                                dataSourceMember.Patch(dataTargetMember);                               
+                                var oldEntry = dataTargetMember.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(member.MemberType));
+                                DynamicPropertyService.LoadDynamicPropertyValues(oldEntry);
+                                changedEntries.Add(new GenericChangedEntry<Member>(member, oldEntry, EntryState.Modified));
+                                dataSourceMember.Patch(dataTargetMember);
                             }
                             else
                             {
@@ -136,7 +138,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         }
 
         public virtual void Delete(string[] ids, string[] memberTypes = null)
-        { 
+        {
             using (var repository = RepositoryFactory())
             {
                 var members = GetByIds(ids, null, memberTypes);
