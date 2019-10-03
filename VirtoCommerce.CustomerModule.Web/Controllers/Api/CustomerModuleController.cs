@@ -117,6 +117,25 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Create new member for BP user on registration page
+        /// </summary>
+        /// <param name="member">concrete instance of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("members/businesspartner")]
+        [ResponseType(typeof(Member))]
+        //[CheckPermission(Permission = CustomerPredefinedPermissions.Create)]
+        [AllowAnonymous]
+        public IHttpActionResult CreateBpMember([FromBody] Member member)
+        {
+            _memberService.SaveChanges(new[] { member });
+            var retVal = _memberService.GetByIds(new[] { member.Id }, null, new[] { member.MemberType }).FirstOrDefault();
+
+            // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
+            return Ok((dynamic)retVal);
+        }
+
+        /// <summary>
         /// Bulk create new members (can be any objects inherited from Member type)
         /// </summary>
         /// <param name="members">Array of concrete instances of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
